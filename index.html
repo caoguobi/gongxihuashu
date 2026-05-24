@@ -3,197 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RS 话术生成器 荣耀时刻版｜三语同步</title>
+    <title>工具整合面板 - 双拼视图</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: "Microsoft Yahei", sans-serif;
-            line-height: 1.8;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 20px 0;
-            background: #fff;
+        
+        /* 顶部导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        th,td {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            text-align: center;
+        
+        .nav-container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
         }
-        th {
-            background: #2c3e50;
-            color: #fff;
+        
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            padding: 12px 0;
         }
-        .box {
-            background: #fff;
-            padding: 15px;
+        
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            background: #f0f2f5;
+            padding: 4px;
             border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .view-btn:hover {
+            color: #667eea;
+        }
+        
+        .view-btn.active {
+            color: #667eea;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 外部链接按钮 */
+        .external-links {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .external-btn {
+            padding: 6px 12px;
+            border: 1px solid #667eea;
+            background: white;
+            color: #667eea;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .external-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* 内容区域 */
+        .content {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* 双拼视图 */
+        .split-view {
+            display: flex;
+            gap: 15px;
+            height: calc(100vh - 80px);
+        }
+        
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .panel-icon {
+            font-size: 16px;
+        }
+        
+        .panel-link {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 12px;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+.panel-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .panel-content {
+            flex: 1;
+            position: relative;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* 单视图模式 */
+        .single-view {
+            display: none;
+            height: calc(100vh - 80px);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .single-view.active {
+            display: block;
+        }
+        
+        .single-view iframe {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 1024px) {
+            .split-view {
+                flex-direction: column;
+                height: auto;
+                min-height: calc(100vh - 80px);
+            }
+            
+            .panel {
+                min-height: 600px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 10px;
+            }
+            
+            .logo {
+                font-size: 16px;
+            }
+            
+            .view-btn span {
+                display: none;
+            }
+            
+            .external-links {
+                display: none;
+            }
+            
+            .content {
+                padding: 10px;
+            }
+            
+            .split-view {
+                gap: 10px;
+                min-height: calc(100vh - 70px);
+            }
+            
+            .panel {
+                min-height: 500px;
+            }
         }
     </style>
 </head>
 <body>
-    <h2>🧩 RS 话术生成器</h2>
-    <p>荣耀时刻版｜三语同步</p>
-
-    <div class="box">
-        <h3>🌟 新员工面板</h3>
-        <p>🆕 选择新员工等级</p>
-        <p>🎉 活动奖励 %</p>
-        <p>0</p>
-        <p>% 基于等级价格</p>
-        <p>🎁 额外奖励 %</p>
-        <p>0</p>
-        <p>% 基于等级价格</p>
-        <p>💵 现金代码</p>
-        <p>🎰 幸运抽奖</p>
-
-        <p>🎊 恭喜晋升 *R1* 成员！ 您的成长，RS 共同见证！📈 💸</p>
-        <p>*R1 收益*： 每个工作日：*RM5* 30个工作日：*RM150* 365个工作日：*RM1,825*</p>
-        <p>🌟 *专属权限已激活*：</p>
-        <p>✅ 更多伙伴邀请权限</p>
-        <p>✅ 专属牧场建设机会</p>
-        <p>*让我们积少成多，共创财富奇迹*！🚀</p>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🛠 工具整合面板</div>
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="switchView('split', this)">
+                    <span>◫</span> 双拼视图
+                </button>
+                <button class="view-btn" onclick="switchView('rsrenwu', this)">
+                    <span>▣</span> 任务推荐
+                </button>
+                <button class="view-btn" onclick="switchView('jinji', this)">
+                    <span>▣</span> 晋级奖励
+                </button>
+            </div>
+            <div class="external-links">
+                <a href="https://abin593505-a11y.github.io/RSrenwutuijian/" target="_blank" class="external-btn">
+                    任务推荐 ↗️
+                </a>
+                <a href="https://abin593505-a11y.github.io/jinjijiangli/" target="_blank" class="external-btn">
+                    晋级奖励 ↗️
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 内容区域 -->
+    <div class="content">
+        <!-- 双拼视图 -->
+        <div id="split-view" class="split-view">
+            <!-- 左侧面板 - 任务推荐 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-icon">📝</span>
+                        任务推荐工具
+                    </div>
+                    <a href="https://abin593505-a11y.github.io/RSrenwutuijian/" target="_blank" class="panel-link">
+                        单独打开 ↗️
+                    </a>
+                </div>
+                <div class="panel-content">
+                    <iframe src="https://abin593505-a11y.github.io/RSrenwutuijian/"></iframe>
+                </div>
+            </div>
+            
+            <!-- 右侧面板 - 晋级奖励 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-icon">🎉</span>
+                        晋级奖励工具
+                    </div>
+                    <a href="https://abin593505-a11y.github.io/jinjijiangli/" target="_blank" class="panel-link">
+                        单独打开 ↗️
+                    </a>
+                </div>
+                <div class="panel-content">
+<iframe src="https://abin593505-a11y.github.io/jinjijiangli/"></iframe>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 单视图 - 任务推荐 -->
+        <div id="single-rsrenwu" class="single-view">
+            <iframe src="https://abin593505-a11y.github.io/RSrenwutuijian/"></iframe>
+        </div>
+        
+        <!-- 单视图 - 晋级奖励 -->
+        <div id="single-jinji" class="single-view">
+            <iframe src="https://abin593505-a11y.github.io/jinjijiangli/"></iframe>
+        </div>
     </div>
-
-    <div class="box">
-        <h3>🤝 邀请者面板</h3>
-        <p>🙋 选择邀请者等级</p>
-        <p>🎉 活动奖励 %</p>
-        <p>0</p>
-        <p>% 基于新员工等级价格</p>
-        <p>🎁 额外奖励 %</p>
-        <p>0</p>
-        <p>% 基于新员工等级</p>
-        <p>💵 现金代码</p>
-        <p>🎰 幸运抽奖</p>
-
-        <p>邀请成功！团队再添新力量 🎉</p>
-        <p>恭喜！您已成功引荐一位 *R1* 加入 RS 大家庭。 📊</p>
-        <p>本次邀请战果：</p>
-        <p>✅ 推荐奖励：*RM15.00* 💰</p>
-        <p>总计 *RM15.00* 已存入您的 RS 账户！ 🚀</p>
-        <p>*持续被动收益*： 即刻起，您将享有 下属每个工作日 3% 的佣金！</p>
-        <p>让每一份引荐，都化为源源不断的成长动力。</p>
-        <p>✨ 星火成炬，共创辉煌！ 感谢您的行动力，让我们携手奔向更广阔的未来！🚀</p>
-    </div>
-
-    <div class="box">
-        <p>✅ 邀请者等级 ≥ 新员工 → 显示每日3%佣金段落</p>
-        <p>💵 现金代码勾选后添加现金代码提示 | 🎰 幸运抽奖勾选后添加抽奖机会提示</p>
-    </div>
-
-    <div class="box">
-        <h3>📊 等级收益基准表</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>级别</th>
-                    <th>价格</th>
-                    <th>数量</th>
-                    <th>单天</th>
-                    <th>日收益</th>
-                    <th>回本</th>
-                    <th>30天</th>
-                    <th>365天</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>R1</td>
-                    <td>150</td>
-                    <td>5</td>
-                    <td>1</td>
-                    <td>5</td>
-                    <td>30天</td>
-                    <td>150</td>
-                    <td>1,825</td>
-                </tr>
-                <tr>
-                    <td>R2</td>
-                    <td>450</td>
-                    <td>10</td>
-                    <td>1.5</td>
-                    <td>15</td>
-                    <td>30天</td>
-                    <td>450</td>
-                    <td>5,475</td>
-                </tr>
-                <tr>
-                    <td>R3</td>
-                    <td>1,350</td>
-                    <td>20</td>
-                    <td>2.25</td>
-                    <td>45</td>
-                    <td>30天</td>
-                    <td>1,350</td>
-                    <td>16,425</td>
-                </tr>
-                <tr>
-                    <td>R4</td>
-                    <td>4,480</td>
-                    <td>40</td>
-                    <td>4</td>
-                    <td>160</td>
-                    <td>28天</td>
-                    <td>4,800</td>
-                    <td>58,400</td>
-                </tr>
-                <tr>
-                    <td>R5</td>
-                    <td>13,440</td>
-                    <td>80</td>
-                    <td>6</td>
-                    <td>480</td>
-                    <td>28天</td>
-                    <td>14,400</td>
-                    <td>175,200</td>
-                </tr>
-                <tr>
-                    <td>R6</td>
-                    <td>32,400</td>
-                    <td>150</td>
-                    <td>8</td>
-                    <td>1,200</td>
-                    <td>27天</td>
-                    <td>36,000</td>
-                    <td>438,000</td>
-                </tr>
-                <tr>
-                    <td>R7</td>
-                    <td>65,000</td>
-                    <td>250</td>
-                    <td>10</td>
-                    <td>2,500</td>
-                    <td>26天</td>
-                    <td>75,000</td>
-                    <td>912,500</td>
-                </tr>
-                <tr>
-                    <td>R8</td>
-                    <td>130,000</td>
-                    <td>400</td>
-                    <td>13</td>
-                    <td>5,200</td>
-                    <td>25天</td>
-                    <td>156,000</td>
-                    <td>1,898,000</td>
-                </tr>
-                <tr>
-                    <td>R9</td>
-                    <td>259,200</td>
-                    <td>600</td>
-                    <td>18</td>
-                    <td>10,800</td>
-                    <td>24天</td>
-                    <td>324,000</td>
-                    <td>3,942,000</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    
+    <script>
+        function switchView(查看, btn) {
+            // 更新按钮状态
+            文档.querySelectorAll('.view-btn').forEach(b => b.classList.移除('active'));
+            if (btn) btn.classList.add('active');
+            
+            // 隐藏所有视图
+            文档.getElementById('split-view').style.display = 'none';
+            文档.getElementById('single-rsrenwu').classList.移除('active');
+            文档.getElementById('single-jinji').classList.移除('active');
+            
+            // 显示对应视图
+            if (查看 === 'split') {
+                文档.getElementById('split-view').style.display = 'flex';
+            } else if (查看 === 'rsrenwu') {
+                文档.getElementById('single-rsrenwu').classList.add('active');
+            } else if (查看 === 'jinji') {
+                文档.getElementById('single-jinji').classList.add('active');
+            }
+        }
+    </script>
 </body>
 </html>
